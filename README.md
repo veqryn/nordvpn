@@ -34,7 +34,7 @@ This container was designed to be started first to provide a connection to other
     docker run -ti --cap-add=NET_ADMIN --device /dev/net/tun --name vpn \
                 -e USER=user@email.com -e PASS='pas$word' \
                 -e COUNTRY=country -e CATEGORY=category \
-                -e PROTOCOL=protocol -d bubuntux/nordvpn
+                -e PROTOCOL=protocol -d bubuntux/nordvpn:openvpn
 
 Once it's up other containers can be started using it's network connection:
 
@@ -46,7 +46,7 @@ The environment variable NETWORK must be your local network that you would conne
 
     docker run -ti --cap-add=NET_ADMIN --device /dev/net/tun --name vpn \
                 -p 8080:80 -e NETWORK=192.168.1.0/24 \ 
-                -e USER=user@email.com -e PASS='pas$word' -d bubuntux/nordvpn                
+                -e USER=user@email.com -e PASS='pas$word' -d bubuntux/nordvpn:openvpn                
 
 Now just create the second container _without_ the `-p` parameter, only inlcude the `--net=container:vpn`, the port should be declare in the vpn container.
 
@@ -60,7 +60,7 @@ now the service provided by the second container would be available from the hos
 version: "3"
 services:
   vpn:
-    image: bubuntux/nordvpn
+    image: bubuntux/nordvpn:openvpn
     cap_add:
       - net_admin
     devices:
