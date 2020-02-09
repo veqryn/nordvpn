@@ -17,25 +17,9 @@ manifestPush(){
   docker manifest push --purge ${DOCKER_REPO}:${version}
 }
 
-push(){
-  local tag=$1
-  for arch in ${X86} ${ARM} ; do
-    echo "**** Tagging ${arch}-${tag} ****"
-    docker tag "${DOCKER_REPO}:${arch}-${VERSION}" "${DOCKER_REPO}:${arch}-${tag}"
-    echo "**** Pushing ${arch}-${tag} ****"
-    docker push "${DOCKER_REPO}:${arch}-${tag}"
-  done
-  manifestPush "${tag}"
-}
 
 for arch in ${X86} ${ARM} ; do
-  echo "**** Pushing ${arch}-${VERSION} ****"
-  docker push "${DOCKER_REPO}:${arch}-${VERSION}"
+  echo "**** Pushing ${arch}-${GIT_BRANCH} ****"
+  docker push "${DOCKER_REPO}:${arch}-${GIT_BRANCH}"
 done
-manifestPush ${VERSION}
-
-if [[ "${GIT_BRANCH}" == "master" ]]; then
-  push "latest"
-else
-  push "${GIT_BRANCH}"
-fi
+manifestPush ${GIT_BRANCH}

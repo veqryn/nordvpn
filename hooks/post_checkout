@@ -1,7 +1,7 @@
 #!/bin/bash
 
-DOCKER_VERSION=18.09.4
-DOCKER_MD5SUM=84dbc6bf7118fa7e974b19faa5fb06b5
+DOCKER_VERSION=19.03.5
+DOCKER_MD5SUM=314f69b24af65fb486042c5ffb13da67
 
 echo "**** Updating docker ****"
 curl "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" | gunzip | tar -x --strip-components 1 docker/docker

@@ -2,14 +2,14 @@
 source hooks/_env
 
 for arch in ${X86} ; do
-  echo "**** Building ${arch}-${VERSION} ****"
-  docker build -f ${DOCKERFILE_PATH} --build-arg ARCH=${arch} -t "${DOCKER_REPO}:${arch}-${VERSION}" .
+  echo "**** Building ${arch}-${GIT_BRANCH} ****"
+  docker build -f ${DOCKERFILE_PATH} --build-arg ARCH=${arch} -t "${DOCKER_REPO}:${arch}-${GIT_BRANCH}" .
 done
 
 echo "**** Enabling cross platform build ****"
 sed -i 's/^#CROSSRUN/RUN/g' $DOCKERFILE_PATH
 
 for arch in ${ARM} ; do
-  echo "**** Building ${arch}-${VERSION} ****"
-  docker build -f ${DOCKERFILE_PATH} --build-arg ARCH=${arch} -t "${DOCKER_REPO}:${arch}-${VERSION}" .
+  echo "**** Building ${arch}-${GIT_BRANCH} ****"
+  docker build -f ${DOCKERFILE_PATH} --build-arg ARCH=${arch} -t "${DOCKER_REPO}:${arch}-${GIT_BRANCH}" .
 done

@@ -1,11 +1,6 @@
 #!/bin/bash
 export PATH=".:$PATH"
 
-export VERSION=`cat README.md | grep -i "# Versions" -A 1 | tail -n 1 | sed 's/^[* ]*//;s/[* ]*$//'`
-if [[ "${GIT_BRANCH}" != "master" ]]; then
-    export VERSION="${VERSION}-${GIT_BRANCH}"
-fi
-
 export X86="i386 amd64"
 export ARM="armv7hf aarch64" # armv5e armv6 not available in balenalib
 
