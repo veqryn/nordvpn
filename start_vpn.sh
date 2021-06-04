@@ -56,6 +56,13 @@ if [[ -n ${docker6_network} ]]; then
   ip6tables -t nat -A POSTROUTING -o nordlynx+ -j MASQUERADE
 fi
 
+echo "[$(date -Iseconds)] Opening basic ports"
+iptables -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
+iptables -A OUTPUT -p udp -m udp --dport 51820 -j ACCEPT
+iptables -A OUTPUT -p tcp -m tcp --dport 1194 -j ACCEPT
+iptables -A OUTPUT -p udp -m udp --dport 1194 -j ACCEPT
+iptables -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
+
 echo "[$(date -Iseconds)] Enabling connection to nordvpn group"
 if [[ -n ${docker_network} ]]; then
   iptables -A OUTPUT -m owner --gid-owner nordvpn -j ACCEPT || {
