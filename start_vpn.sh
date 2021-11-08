@@ -1,14 +1,16 @@
 #!/bin/bash
-iptables -P OUTPUT DROP
-iptables -P INPUT DROP
-iptables -P FORWARD DROP
-ip6tables -P OUTPUT DROP 2>/dev/null
-ip6tables -P INPUT DROP 2>/dev/null
-ip6tables -P FORWARD DROP 2>/dev/null
-iptables -F
-iptables -X
-ip6tables -F 2>/dev/null
-ip6tables -X 2>/dev/null
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+iptables-legacy -P OUTPUT DROP
+iptables-legacy -P INPUT DROP
+iptables-legacy -P FORWARD DROP
+ip6tables-legacy -P OUTPUT DROP 2>/dev/null
+ip6tables-legacy -P INPUT DROP 2>/dev/null
+ip6tables-legacy -P FORWARD DROP 2>/dev/null
+iptables-legacy -F
+iptables-legacy -X
+ip6tables-legacy -F 2>/dev/null
+ip6tables-legacy -X 2>/dev/null
 
 [[ "${DEBUG,,}" == trace* ]] && set -x
 
@@ -26,70 +28,70 @@ docker6_network="$(ip -o addr show dev eth0 | awk '$3 == "inet6" {print $4; exit
 
 echo "[$(date -Iseconds)] Enabling connection to secure interfaces"
 if [[ -n ${docker_network} ]]; then
-  iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  iptables -A INPUT -i lo -j ACCEPT
-  iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  iptables -A FORWARD -i lo -j ACCEPT
-  iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  iptables -A OUTPUT -o lo -j ACCEPT
-  iptables -A OUTPUT -o tap+ -j ACCEPT
-  iptables -A OUTPUT -o tun+ -j ACCEPT
-  iptables -A OUTPUT -o nordlynx+ -j ACCEPT
-  iptables -t nat -A POSTROUTING -o tap+ -j MASQUERADE
-  iptables -t nat -A POSTROUTING -o tun+ -j MASQUERADE
-  iptables -t nat -A POSTROUTING -o nordlynx+ -j MASQUERADE
+  iptables-legacy -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  iptables-legacy -A INPUT -i lo -j ACCEPT
+  iptables-legacy -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  iptables-legacy -A FORWARD -i lo -j ACCEPT
+  iptables-legacy -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  iptables-legacy -A OUTPUT -o lo -j ACCEPT
+  iptables-legacy -A OUTPUT -o tap+ -j ACCEPT
+  iptables-legacy -A OUTPUT -o tun+ -j ACCEPT
+  iptables-legacy -A OUTPUT -o nordlynx+ -j ACCEPT
+  iptables-legacy -t nat -A POSTROUTING -o tap+ -j MASQUERADE
+  iptables-legacy -t nat -A POSTROUTING -o tun+ -j MASQUERADE
+  iptables-legacy -t nat -A POSTROUTING -o nordlynx+ -j MASQUERADE
 fi
 if [[ -n ${docker6_network} ]]; then
-  ip6tables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  ip6tables -A INPUT -p icmp -j ACCEPT
-  ip6tables -A INPUT -i lo -j ACCEPT
-  ip6tables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  ip6tables -A FORWARD -p icmp -j ACCEPT
-  ip6tables -A FORWARD -i lo -j ACCEPT
-  ip6tables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-  ip6tables -A OUTPUT -o lo -j ACCEPT
-  ip6tables -A OUTPUT -o tap+ -j ACCEPT
-  ip6tables -A OUTPUT -o tun+ -j ACCEPT
-  ip6tables -A OUTPUT -o nordlynx+ -j ACCEPT
-  ip6tables -t nat -A POSTROUTING -o tap+ -j MASQUERADE
-  ip6tables -t nat -A POSTROUTING -o tun+ -j MASQUERADE
-  ip6tables -t nat -A POSTROUTING -o nordlynx+ -j MASQUERADE
+  ip6tables-legacy -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  ip6tables-legacy -A INPUT -p icmp -j ACCEPT
+  ip6tables-legacy -A INPUT -i lo -j ACCEPT
+  ip6tables-legacy -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  ip6tables-legacy -A FORWARD -p icmp -j ACCEPT
+  ip6tables-legacy -A FORWARD -i lo -j ACCEPT
+  ip6tables-legacy -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+  ip6tables-legacy -A OUTPUT -o lo -j ACCEPT
+  ip6tables-legacy -A OUTPUT -o tap+ -j ACCEPT
+  ip6tables-legacy -A OUTPUT -o tun+ -j ACCEPT
+  ip6tables-legacy -A OUTPUT -o nordlynx+ -j ACCEPT
+  ip6tables-legacy -t nat -A POSTROUTING -o tap+ -j MASQUERADE
+  ip6tables-legacy -t nat -A POSTROUTING -o tun+ -j MASQUERADE
+  ip6tables-legacy -t nat -A POSTROUTING -o nordlynx+ -j MASQUERADE
 fi
 
 echo "[$(date -Iseconds)] Enabling connection to nordvpn group"
 if [[ -n ${docker_network} ]]; then
-  iptables -A OUTPUT -m owner --gid-owner nordvpn -j ACCEPT || {
+  iptables-legacy -A OUTPUT -m owner --gid-owner nordvpn -j ACCEPT || {
     echo "[$(date -Iseconds)] group match failed, fallback to open necessary ports"
-    iptables -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
-    iptables -A OUTPUT -p udp -m udp --dport 51820 -j ACCEPT
-    iptables -A OUTPUT -p tcp -m tcp --dport 1194 -j ACCEPT
-    iptables -A OUTPUT -p udp -m udp --dport 1194 -j ACCEPT
-    iptables -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
+    iptables-legacy -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
+    iptables-legacy -A OUTPUT -p udp -m udp --dport 51820 -j ACCEPT
+    iptables-legacy -A OUTPUT -p tcp -m tcp --dport 1194 -j ACCEPT
+    iptables-legacy -A OUTPUT -p udp -m udp --dport 1194 -j ACCEPT
+    iptables-legacy -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
   }
 fi
 if [[ -n ${docker6_network} ]]; then
-  ip6tables -A OUTPUT -m owner --gid-owner nordvpn -j ACCEPT || {
+  ip6tables-legacy -A OUTPUT -m owner --gid-owner nordvpn -j ACCEPT || {
     echo "[$(date -Iseconds)] ip6 group match failed, fallback to open necessary ports"
-    ip6tables -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
-    ip6tables -A OUTPUT -p udp -m udp --dport 51820 -j ACCEPT
-    ip6tables -A OUTPUT -p tcp -m tcp --dport 1194 -j ACCEPT
-    ip6tables -A OUTPUT -p udp -m udp --dport 1194 -j ACCEPT
-    ip6tables -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
+    ip6tables-legacy -A OUTPUT -p udp -m udp --dport 53 -j ACCEPT
+    ip6tables-legacy -A OUTPUT -p udp -m udp --dport 51820 -j ACCEPT
+    ip6tables-legacy -A OUTPUT -p tcp -m tcp --dport 1194 -j ACCEPT
+    ip6tables-legacy -A OUTPUT -p udp -m udp --dport 1194 -j ACCEPT
+    ip6tables-legacy -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
   }
 fi
 
 echo "[$(date -Iseconds)] Enabling connection to docker network"
 if [[ -n ${docker_network} ]]; then
-  iptables -A INPUT -s "${docker_network}" -j ACCEPT
-  iptables -A FORWARD -d "${docker_network}" -j ACCEPT
-  iptables -A FORWARD -s "${docker_network}" -j ACCEPT
-  iptables -A OUTPUT -d "${docker_network}" -j ACCEPT
+  iptables-legacy -A INPUT -s "${docker_network}" -j ACCEPT
+  iptables-legacy -A FORWARD -d "${docker_network}" -j ACCEPT
+  iptables-legacy -A FORWARD -s "${docker_network}" -j ACCEPT
+  iptables-legacy -A OUTPUT -d "${docker_network}" -j ACCEPT
 fi
 if [[ -n ${docker6_network} ]]; then
-  ip6tables -A INPUT -s "${docker6_network}" -j ACCEPT 2>/dev/null
-  ip6tables -A FORWARD -d "${docker6_network}" -j ACCEPT 2>/dev/null
-  ip6tables -A FORWARD -s "${docker6_network}" -j ACCEPT 2>/dev/null
-  ip6tables -A OUTPUT -d "${docker6_network}" -j ACCEPT 2>/dev/null
+  ip6tables-legacy -A INPUT -s "${docker6_network}" -j ACCEPT 2>/dev/null
+  ip6tables-legacy -A FORWARD -d "${docker6_network}" -j ACCEPT 2>/dev/null
+  ip6tables-legacy -A FORWARD -s "${docker6_network}" -j ACCEPT 2>/dev/null
+  ip6tables-legacy -A OUTPUT -d "${docker6_network}" -j ACCEPT 2>/dev/null
 fi
 
 if [[ -n ${docker_network} && -n ${NETWORK} ]]; then
@@ -97,10 +99,10 @@ if [[ -n ${docker_network} && -n ${NETWORK} ]]; then
   for net in ${NETWORK//[;,]/ }; do
     echo "[$(date -Iseconds)] Enabling connection to network ${net}"
     ip route | grep -q "$net" || ip route add to "$net" via "$gw" dev eth0
-    iptables -A INPUT -s "$net" -j ACCEPT
-    iptables -A FORWARD -d "$net" -j ACCEPT
-    iptables -A FORWARD -s "$net" -j ACCEPT
-    iptables -A OUTPUT -d "$net" -j ACCEPT
+    iptables-legacy -A INPUT -s "$net" -j ACCEPT
+    iptables-legacy -A FORWARD -d "$net" -j ACCEPT
+    iptables-legacy -A FORWARD -s "$net" -j ACCEPT
+    iptables-legacy -A OUTPUT -d "$net" -j ACCEPT
   done
 fi
 if [[ -n ${docker6_network} && -n ${NETWORK6} ]]; then
@@ -108,10 +110,10 @@ if [[ -n ${docker6_network} && -n ${NETWORK6} ]]; then
   for net6 in ${NETWORK6//[;,]/ }; do
     echo "[$(date -Iseconds)] Enabling connection to network ${net6}"
     ip -6 route | grep -q "$net6" || ip -6 route add to "$net6" via "$gw6" dev eth0
-    ip6tables -A INPUT -s "$net6" -j ACCEPT
-    ip6tables -A FORWARD -d "$net6" -j ACCEPT
-    ip6tables -A FORWARD -s "$net6" -j ACCEPT
-    ip6tables -A OUTPUT -d "$net6" -j ACCEPT
+    ip6tables-legacy -A INPUT -s "$net6" -j ACCEPT
+    ip6tables-legacy -A FORWARD -d "$net6" -j ACCEPT
+    ip6tables-legacy -A FORWARD -s "$net6" -j ACCEPT
+    ip6tables-legacy -A OUTPUT -d "$net6" -j ACCEPT
   done
 fi
 
@@ -119,8 +121,8 @@ if [[ -n ${WHITELIST} ]]; then
   for domain in ${WHITELIST//[;,]/ }; do
     domain=$(echo "$domain" | sed 's/^.*:\/\///;s/\/.*$//')
     echo "[$(date -Iseconds)] Enabling connection to host ${domain}"
-    sg nordvpn -c "iptables  -A OUTPUT -o eth0 -d ${domain} -j ACCEPT"
-    sg nordvpn -c "ip6tables -A OUTPUT -o eth0 -d ${domain} -j ACCEPT 2>/dev/null"
+    sg nordvpn -c "iptables-legacy  -A OUTPUT -o eth0 -d ${domain} -j ACCEPT"
+    sg nordvpn -c "ip6tables-legacy -A OUTPUT -o eth0 -d ${domain} -j ACCEPT 2>/dev/null"
   done
 fi
 
