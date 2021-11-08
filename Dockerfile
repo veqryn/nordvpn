@@ -1,17 +1,18 @@
-FROM ubuntu:18.04
+FROM debian:bullseye
 
 LABEL maintainer="Julio Gutierrez"
-ARG NORDVPN_VERSION=3.11.0-1
+ARG NORDVPN_VERSION=3.12.0-1
 
-RUN apt-get update -y && \
-    apt-get install -y curl iputils-ping tzdata && \
+RUN apt update -y && \
+    apt upgrade -y && \
+    apt install -y --no-install-recommends curl iputils-ping tzdata ca-certificates && \
     curl https://repo.nordvpn.com/deb/nordvpn/debian/pool/main/nordvpn-release_1.0.0_all.deb --output /tmp/nordrepo.deb && \
-    apt-get install -y /tmp/nordrepo.deb && \
-    apt-get update -y && \
-    apt-get install -y nordvpn${NORDVPN_VERSION:+=$NORDVPN_VERSION} && \
-    apt-get remove -y nordvpn-release && \
-    apt-get autoremove -y && \
-    apt-get autoclean -y && \
+    apt install -y --no-install-recommends /tmp/nordrepo.deb && \
+    apt update -y && \
+    apt install -y --no-install-recommends nordvpn${NORDVPN_VERSION:+=$NORDVPN_VERSION} && \
+    apt remove -y nordvpn-release && \
+    apt autoremove -y && \
+    apt autoclean -y && \
     rm -rf \
 		/tmp/* \
 		/var/cache/apt/archives/* \
