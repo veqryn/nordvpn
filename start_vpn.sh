@@ -121,9 +121,21 @@ if [[ -n ${WHITELIST} ]]; then
   for domain in ${WHITELIST//[;,]/ }; do
     domain=$(echo "$domain" | sed 's/^.*:\/\///;s/\/.*$//')
     echo "[$(date -Iseconds)] Enabling connection to host ${domain}"
-    sg nordvpn -c "iptables-legacy  -A OUTPUT -o eth0 -d ${domain} -j ACCEPT"
-    sg nordvpn -c "ip6tables-legacy -A OUTPUT -o eth0 -d ${domain} -j ACCEPT 2>/dev/null"
+    if [[ -n ${docker_network} ]]; then
+      sg nordvpn -c "iptables-legacy -A OUTPUT -o eth0 -d ${domain} -j ACCEPT"
+    fi
+    if [[ -n ${docker6_network} ]]; then
+      sg nordvpn -c "ip6tables-legacy -A OUTPUT -o eth0 -d ${domain} -j ACCEPT 2>/dev/null"
+    fi
   done
+fi
+
+echo "Bypass requests to NordVPN API thru regular connection"
+if [[ -n ${docker_network} ]]; then
+  sg nordvpn -c "iptables-legacy -A OUTPUT -o eth0 -d "api.nordvpn.com" -j ACCEPT"
+fi
+if [[ -n ${docker6_network} ]]; then
+  sg nordvpn -c "ip6tables-legacy -A OUTPUT -o eth0 -d "api.nordvpn.com" -j ACCEPT 2> /dev/null"
 fi
 
 mkdir -p /dev/net
@@ -132,6 +144,13 @@ mkdir -p /dev/net
 restart_daemon() {
   echo "[$(date -Iseconds)] Restarting the service"
   service nordvpn stop
+  sleep 0.2
+  # TODO: maybe remove this
+  if [[ "${DEBUG,,}" == trace* ]]; then
+    ls -la /run/nordvpn/
+    ps -ef
+    sysctl net.ipv4.conf.all.rp_filter
+  fi
   rm -rf /run/nordvpn/nordvpnd.sock
   service nordvpn start
 
@@ -144,8 +163,9 @@ restart_daemon() {
       exit 1
     fi
     attempt_counter=$((attempt_counter + 1))
-    sleep 0.1
+    sleep 0.2
   done
+  [[ "${DEBUG,,}" == trace+* ]] && nordvpn settings
 }
 restart_daemon
 
@@ -221,10 +241,33 @@ trap cleanup SIGTERM SIGINT EXIT # https://www.ctl.io/developers/blog/post/grace
 [[ -n ${RECONNECT} && -z ${CHECK_CONNECTION_INTERVAL} ]] && CHECK_CONNECTION_INTERVAL=${RECONNECT}
 while true; do
   sleep "${CHECK_CONNECTION_INTERVAL:-300}"
-  if [[ ! $(curl -Is -m 30 -o /dev/null -w "%{http_code}" "${CHECK_CONNECTION_URL:-www.google.com}") =~ ^[23] ]]; then
-    echo "[$(date -Iseconds)] Unstable connection detected!"
-    nordvpn status
-    restart_daemon
-    connect
-  fi
+  attempt_counter=0
+  max_attempts="${CHECK_CONNECTION_ATTEMPTS:-5}"
+  until [[ $(curl -Is -m "${CHECK_CONNECTION_TIMEOUT:-30}" -o /dev/null -w "%{http_code}" "${CHECK_CONNECTION_URL:-www.google.com}") =~ ^[23] ]]; do
+    if [ ${attempt_counter} -ge ${max_attempts} ]; then
+      echo "[$(date -Iseconds)] Unstable connection detected!"
+      nordvpn status
+      case "${CHECK_CONNECTION_FAILURE_ACTION:-"restart"}" in
+        "restart")
+          restart_daemon
+          connect
+          ;;
+        "reconnect")
+          # Possible fix for issue: https://forum.manjaro.org/t/nordvpn-bin-breaks-every-4-hours/80927/22
+          # SERVER=$(nordvpn status | grep -o "[a-z]\{2\}[0-9]\+")
+          # nordvpn c "${SERVER}"
+          connect
+          ;;
+        "log")
+          # Already logged above, so just keep looping. Useful for diagnosing an issue when you don't want the service restarted.
+          ;;
+        *)
+          echo "Invalid option for CHECK_CONNECTION_FAILURE_ACTION: ${CHECK_CONNECTION_FAILURE_ACTION}"
+          exit 1
+          ;;
+      esac
+    fi
+    attempt_counter=$((attempt_counter + 1))
+    sleep "${CHECK_CONNECTION_RETRY_INTERVAL:-15}"
+  done
 done

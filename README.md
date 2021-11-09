@@ -193,7 +193,11 @@ services:
 * `PORTS`  - Semicolon delimited list of ports to whitelist for both UDP and TCP. For example '- PORTS=9091;9095'
 * `PORT_RANGE`  - Port range to whitelist for both UDP and TCP. For example '- PORT_RANGE=9091 9095'
 * `CHECK_CONNECTION_INTERVAL`  - Time in seconds to check connection and reconnect if need it. (300 by default) For example '- CHECK_CONNECTION_INTERVAL=600'
+* `CHECK_CONNECTION_RETRY_INTERVAL`  - Time in seconds to sleep between connection retries. (15 by default) For example '- CHECK_CONNECTION_RETRY_INTERVAL=60'
+* `CHECK_CONNECTION_ATTEMPTS`  - Number of connection attempts to make. (5 by default) For example '- CHECK_CONNECTION_ATTEMPTS=10'
+* `CHECK_CONNECTION_TIMEOUT`  - Time in seconds before connection attempt is timed out. (30 by default) For example '- CHECK_CONNECTION_TIMEOUT=60'
 * `CHECK_CONNECTION_URL`  - URL for checking Internet connection. (www.google.com by default) For example '- CHECK_CONNECTION_URL=www.custom.domain'
+* `CHECK_CONNECTION_FAILURE_ACTION`  - Action to take after connection attempts have been exceeded. Values can be `restart`, `reconnect`, or `log`. (restart by default) For example '- CHECK_CONNECTION_FAILURE_ACTION=log'
 * `TZ`  - Specify a timezone to use. For example  '- TZ=Europe/London'
 * `DEBUG`  - info, trace or trace+. Set to 'trace' for troubleshooting, 'trace+' will log your User and Pass.
 
