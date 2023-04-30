@@ -1,7 +1,8 @@
 #!/bin/bash
+set -x
 
 if [[ ! -d /run/nordvpn ]]; then
   mkdir -m 0770 /run/nordvpn
 fi
 
-exec s6-notifyoncheck -d /usr/sbin/nordvpnd > /dev/null
+exec s6-notifyoncheck -n 60 -d /usr/sbin/nordvpnd > /tmp/nordvpnd.log 2>&1

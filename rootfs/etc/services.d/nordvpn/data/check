@@ -1,4 +1,6 @@
 #!/bin/bash
+set -x
 
 [ -S /run/nordvpn/nordvpnd.sock ] && exit 0
+date
 exit 1

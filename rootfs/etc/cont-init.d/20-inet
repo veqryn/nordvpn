@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 docker_networks=$(dockerNetworks)
 if [ -z "$docker_networks" ]; then

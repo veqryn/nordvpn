@@ -1,4 +1,8 @@
 #!/bin/bash
+set -x
+
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 
 iptables -P OUTPUT DROP
 iptables -P INPUT DROP
